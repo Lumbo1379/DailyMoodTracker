@@ -1,15 +1,16 @@
-package com.example.dailymoodtracker;
+package com.example.dailymoodtracker.controller;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.ColorUtils;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
+
+import com.example.dailymoodtracker.R;
+import com.example.dailymoodtracker.model.Mood;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
                 int nextPosition;
 
-                if (position + positionOffset >= position && position != mAdapter.mColors.size() - 1)
+                if (position + positionOffset >= position && position != mAdapter.getItemCount() - 1)
                     nextPosition = position + 1;
                 else
                     nextPosition = position - 1;
 
-                int resultColor = ColorUtils.blendARGB(mAdapter.mColors.get(position), mAdapter.mColors.get(nextPosition), Math.abs(positionOffset));
+                int resultColor = ColorUtils.blendARGB(mAdapter.getMoods().get(position).getColor(), mAdapter.getMoods().get(nextPosition).getColor(), Math.abs(positionOffset));
                 mConstraintLayout.setBackgroundColor(resultColor);
             }
 
@@ -58,20 +59,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        List<Integer> images = Arrays.asList(R.drawable.smiley_super_happy,
-                R.drawable.smiley_happy,
-                R.drawable.smiley_normal,
-                R.drawable.smiley_disappointed,
-                R.drawable.smiley_sad);
-
-        List<Integer> colors = Arrays.asList(Color.RED,
-                Color.LTGRAY,
-                Color.BLUE,
-                Color.GREEN,
-                Color.YELLOW);
-
-        mAdapter = new MoodViewPagerAdapter(images, colors);
+        mAdapter = new MoodViewPagerAdapter(generateMoods());
         mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
         mViewPager2.setAdapter(mAdapter);
+    }
+
+    private List<Mood> generateMoods() {
+
+        Mood superHappy = new Mood(R.drawable.smiley_super_happy, Color.RED);
+        Mood happy = new Mood(R.drawable.smiley_happy, Color.LTGRAY);
+        Mood normal = new Mood(R.drawable.smiley_normal, Color.BLUE);
+        Mood disappointed = new Mood(R.drawable.smiley_disappointed, Color.GREEN);
+        Mood sad = new Mood(R.drawable.smiley_sad, Color.YELLOW);
+
+        return Arrays.asList(superHappy,
+                happy,
+                normal,
+                disappointed,
+                sad);
     }
 }

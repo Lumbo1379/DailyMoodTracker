@@ -1,6 +1,5 @@
-package com.example.dailymoodtracker;
+package com.example.dailymoodtracker.controller;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +10,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.dailymoodtracker.R;
+import com.example.dailymoodtracker.model.Mood;
+
 import java.util.List;
 
 public class MoodViewPagerAdapter extends RecyclerView.Adapter<MoodViewPagerAdapter.MoodViewHolder> {
 
-    public List<Integer> mImages;
-    public List<Integer> mColors;
+    public List<Mood> getMoods() {
+        return moods;
+    }
 
+    public void setMoods(List<Mood> moods) {
+        this.moods = moods;
+    }
+
+    private List<Mood> moods;
     private TextView mDebugText;
     private ViewPager2 mViewPager2;
 
-    public MoodViewPagerAdapter(List<Integer> images, List<Integer> colors) {
-        mImages = images;
-        mColors = colors;
+    public MoodViewPagerAdapter(List<Mood> moods) {
+        setMoods(moods);
     }
 
     @NonNull
@@ -36,13 +43,13 @@ public class MoodViewPagerAdapter extends RecyclerView.Adapter<MoodViewPagerAdap
 
     @Override
     public void onBindViewHolder(@NonNull MoodViewHolder holder, int position) {
-        int currentImage = mImages.get(position);
+        int currentImage = moods.get(position).getImage();
         holder.mImageView.setImageResource(currentImage);
     }
 
     @Override
     public int getItemCount() {
-        return mImages.size();
+        return moods.size();
     }
 
     public class MoodViewHolder extends RecyclerView.ViewHolder {
