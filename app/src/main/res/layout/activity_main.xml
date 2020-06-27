@@ -29,10 +29,22 @@
         android:id="@+id/activity_main_image_history"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="12dp"
         android:src="@drawable/ic_history_black"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/activity_main_image_comment"
+        android:layout_width="77dp"
+        android:layout_height="77dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_comment_black_48px"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        android:padding="12dp"/>
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
