@@ -37,7 +37,6 @@ public class MoodViewPagerAdapter extends RecyclerView.Adapter<MoodViewPagerAdap
     @Override
     public MoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mood_item_view_pager, parent, false);
-
         return new MoodViewHolder(view);
     }
 

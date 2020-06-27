@@ -5,8 +5,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.ColorUtils;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.dailymoodtracker.R;
@@ -17,10 +21,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int MOOD_HISTORY_ACTIVITY_REQUEST_CODE = 42;
+
     private ViewPager2 mViewPager2;
-    private MoodViewPagerAdapter mAdapter;
+    private MoodViewPagerAdapter mMoodAdapter;
     private TextView mDebugText;
     private ConstraintLayout mConstraintLayout;
+    private ImageView mHistoryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         mViewPager2 = findViewById(R.id.activity_main_pager_image);
         mDebugText = findViewById(R.id.activity_main_text_debug);
         mConstraintLayout = (ConstraintLayout)findViewById(R.id.activity_main);
+        mHistoryButton = findViewById(R.id.activity_main_image_history);
+        mMoodAdapter = new MoodViewPagerAdapter(generateMoods());
 
         mViewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -39,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
                 int nextPosition;
 
-                if (position + positionOffset >= position && position != mAdapter.getItemCount() - 1)
+                if (position + positionOffset >= position && position != mMoodAdapter.getItemCount() - 1)
                     nextPosition = position + 1;
                 else
                     nextPosition = position - 1;
 
-                int resultColor = ColorUtils.blendARGB(mAdapter.getMoods().get(position).getColor(), mAdapter.getMoods().get(nextPosition).getColor(), Math.abs(positionOffset));
+                int resultColor = ColorUtils.blendARGB(mMoodAdapter.getMoods().get(position).getColor(), mMoodAdapter.getMoods().get(nextPosition).getColor(), Math.abs(positionOffset));
                 mConstraintLayout.setBackgroundColor(resultColor);
             }
 
@@ -59,9 +68,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mAdapter = new MoodViewPagerAdapter(generateMoods());
+        mHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent moodHistoryIntent = new Intent(MainActivity.this, MoodHistoryActivity.class);
+                startActivityForResult(moodHistoryIntent, MOOD_HISTORY_ACTIVITY_REQUEST_CODE);
+            }
+        });
+
         mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
-        mViewPager2.setAdapter(mAdapter);
+        mViewPager2.setAdapter(mMoodAdapter);
+        mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
     }
 
     private List<Mood> generateMoods() {
