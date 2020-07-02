@@ -7,16 +7,27 @@
     <ImageView android:id="@+id/list_row_layout_image_rectangle"
         android:layout_height="75dp"
         android:layout_width="match_parent"
-        android:src="@drawable/rectangle"/>
+        android:src="@drawable/rectangle"
+        />
 
     <TextView android:id="@+id/list_row_layout_text_time"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/list_row_layout_image_rectangle"
         android:textColor="#ffffff"
         android:textSize="16dip"
         android:layout_marginRight="120dip"
         android:layout_marginLeft="8dip"
         android:layout_marginTop="10dip" />
+
+    <ImageView
+        android:id="@+id/list_row_layout_image_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/list_row_layout_image_rectangle"
+        android:layout_marginTop="26dp"
+        android:layout_marginLeft="-50dp"
+        android:src="@drawable/ic_comment_black_48px"
+        android:visibility="invisible"/>
 
 </RelativeLayout>

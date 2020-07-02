@@ -5,16 +5,23 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.ColorUtils;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.dailymoodtracker.R;
 import com.example.dailymoodtracker.model.Mood;
+import com.example.dailymoodtracker.model.MoodHistory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mDebugText;
     private ConstraintLayout mConstraintLayout;
     private ImageView mHistoryButton;
+    private ImageView mCommentButton;
+    private String mCommentText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         mDebugText = findViewById(R.id.activity_main_text_debug);
         mConstraintLayout = (ConstraintLayout)findViewById(R.id.activity_main);
         mHistoryButton = findViewById(R.id.activity_main_image_history);
+        mCommentButton = findViewById(R.id.activity_main_image_comment);
         mMoodAdapter = new MoodViewPagerAdapter(generateMoods());
 
         mViewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -76,6 +86,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mCommentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                builder.setTitle("Comment");
+
+                View viewInflated = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialogue_comment, null);
+                final EditText input = (EditText)viewInflated.findViewById(R.id.dialogue_comment_input);
+                builder.setView(viewInflated);
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mCommentText = input.getText().toString();
+
+                        Mood mood = new Mood(R.drawable.smiley_happy, Color.GREEN);
+                        MoodHistory.addMood(mood);
+                        MoodHistory.getMood(0).setComment(mCommentText);
+                    }
+                });
+
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+        });
+
         mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
         mViewPager2.setAdapter(mMoodAdapter);
         mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
@@ -83,11 +126,11 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Mood> generateMoods() {
 
-        Mood superHappy = new Mood(R.drawable.smiley_super_happy, Color.RED);
-        Mood happy = new Mood(R.drawable.smiley_happy, Color.LTGRAY);
+        Mood superHappy = new Mood(R.drawable.smiley_super_happy, Color.YELLOW);
+        Mood happy = new Mood(R.drawable.smiley_happy, Color.GREEN);
         Mood normal = new Mood(R.drawable.smiley_normal, Color.BLUE);
-        Mood disappointed = new Mood(R.drawable.smiley_disappointed, Color.GREEN);
-        Mood sad = new Mood(R.drawable.smiley_sad, Color.YELLOW);
+        Mood disappointed = new Mood(R.drawable.smiley_disappointed, Color.LTGRAY);
+        Mood sad = new Mood(R.drawable.smiley_sad, Color.RED);
 
         return Arrays.asList(superHappy,
                 happy,

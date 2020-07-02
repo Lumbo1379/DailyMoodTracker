@@ -8,9 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.dailymoodtracker.R;
 import com.example.dailymoodtracker.model.Mood;
+import com.example.dailymoodtracker.model.MoodHistory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,24 +20,20 @@ import java.util.List;
 public class MoodHistoryAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<Mood> mMoods;
+    private Toast mToast;
 
     public MoodHistoryAdapter(Context context) {
         mContext = context;
-        mMoods = new ArrayList<Mood>();
-
-        Mood test = new Mood(R.drawable.smiley_super_happy, Color.RED);
-        mMoods.add(test);
     }
 
     @Override
     public int getCount() {
-        return mMoods.size();
+        return MoodHistory.getCount();
     }
 
     @Override
     public Object getItem(int position) {
-        return mMoods.get(position);
+        return MoodHistory.getMood(position);
     }
 
     @Override
@@ -46,18 +44,33 @@ public class MoodHistoryAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        Mood mood = mMoods.get(position);
-
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         convertView = inflater.inflate(R.layout.list_row_layout, null);
 
-        ImageView imageView = (ImageView)convertView.findViewById(R.id.list_row_layout_image_rectangle);
-        imageView.setBackgroundColor(mood.getImage());
+        Mood mood = MoodHistory.getMood(position);
+
+        ImageView imageViewRectangle = (ImageView) convertView.findViewById(R.id.list_row_layout_image_rectangle);
+        imageViewRectangle.setBackgroundColor(mood.getColor());
+
+        if (!mood.getComment().isEmpty()) {
+            ImageView imageViewComment = (ImageView) convertView.findViewById(R.id.list_row_layout_image_comment);
+            imageViewComment.setTag(position);
+            imageViewComment.setVisibility(View.VISIBLE);
+
+            imageViewComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mToast != null) {
+                        mToast.cancel();
+                    }
+
+                    int moodPosition = (int)v.getTag();
+                    mToast = Toast.makeText(v.getContext(), MoodHistory.getMood(moodPosition).getComment(), Toast.LENGTH_SHORT);
+                    mToast.show();
+                }
+            });
+        }
 
         return convertView;
-    }
-
-    public void addMood(Mood mood) {
-        mMoods.add(mood);
     }
 }
