@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.ListView;
 
 import com.example.dailymoodtracker.R;
+import com.example.dailymoodtracker.adapters.MoodHistoryAdapter;
 
 public class MoodHistoryActivity extends AppCompatActivity {
 

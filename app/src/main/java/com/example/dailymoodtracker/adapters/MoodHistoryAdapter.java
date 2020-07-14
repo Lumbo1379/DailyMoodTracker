@@ -1,21 +1,17 @@
-package com.example.dailymoodtracker.controller;
+package com.example.dailymoodtracker.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dailymoodtracker.R;
-import com.example.dailymoodtracker.model.Mood;
-import com.example.dailymoodtracker.model.MoodHistory;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.dailymoodtracker.data.MoodHistory;
 
 public class MoodHistoryAdapter extends BaseAdapter {
 
@@ -44,15 +40,45 @@ public class MoodHistoryAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        position = MoodHistory.getCount() - 1 - position; // Bottom, up - newest, oldest
+
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         convertView = inflater.inflate(R.layout.list_row_layout, null);
 
-        Mood mood = MoodHistory.getMood(position);
+        int mood = MoodHistory.getMood(position);
+        String comment = MoodHistory.getComment(position);
 
         ImageView imageViewRectangle = (ImageView) convertView.findViewById(R.id.list_row_layout_image_rectangle);
-        imageViewRectangle.setBackgroundColor(mood.getColor());
+        imageViewRectangle.setBackgroundColor(mood);
 
-        if (!mood.getComment().isEmpty()) {
+        TextView textView = (TextView) convertView.findViewById(R.id.list_row_layout_text_time);
+
+        switch (position)
+        {
+            case 0:
+                textView.setText("One day ago");
+                break;
+            case 1:
+                textView.setText("Two days ago");
+                break;
+            case 2:
+                textView.setText("Three days ago");
+                break;
+            case 3:
+                textView.setText("Four days ago");
+                break;
+            case 4:
+                textView.setText("Five days ago");
+                break;
+            case 5:
+                textView.setText("Six days ago");
+                break;
+            case 6:
+                textView.setText("Seven days ago");
+                break;
+        }
+
+        if (!comment.isEmpty()) {
             ImageView imageViewComment = (ImageView) convertView.findViewById(R.id.list_row_layout_image_comment);
             imageViewComment.setTag(position);
             imageViewComment.setVisibility(View.VISIBLE);
@@ -65,7 +91,7 @@ public class MoodHistoryAdapter extends BaseAdapter {
                     }
 
                     int moodPosition = (int)v.getTag();
-                    mToast = Toast.makeText(v.getContext(), MoodHistory.getMood(moodPosition).getComment(), Toast.LENGTH_SHORT);
+                    mToast = Toast.makeText(v.getContext(), MoodHistory.getComment(moodPosition), Toast.LENGTH_SHORT);
                     mToast.show();
                 }
             });

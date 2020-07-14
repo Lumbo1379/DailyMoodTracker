@@ -5,25 +5,28 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.ColorUtils;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.dailymoodtracker.R;
+import com.example.dailymoodtracker.adapters.MoodViewPagerAdapter;
 import com.example.dailymoodtracker.model.Mood;
-import com.example.dailymoodtracker.model.MoodHistory;
+import com.example.dailymoodtracker.data.MoodHistory;
+import com.example.dailymoodtracker.receivers.MoodBroadcastReceiver;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,11 +40,13 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mHistoryButton;
     private ImageView mCommentButton;
     private String mCommentText = "";
+    private MoodHistory mMoodHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mMoodHistory = new MoodHistory(getPreferences(MODE_PRIVATE), Color.GREEN);
 
         mViewPager2 = findViewById(R.id.activity_main_pager_image);
         mDebugText = findViewById(R.id.activity_main_text_debug);
@@ -50,10 +55,26 @@ public class MainActivity extends AppCompatActivity {
         mCommentButton = findViewById(R.id.activity_main_image_comment);
         mMoodAdapter = new MoodViewPagerAdapter(generateMoods());
 
+
+        AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, MoodBroadcastReceiver.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        //calendar.set(Calendar.HOUR_OF_DAY, 24);
+        calendar.set(Calendar.HOUR_OF_DAY, 13);
+        calendar.set(Calendar.MINUTE, 47);
+
+        //alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000 * 60 * 60 * 24, alarmIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000 * 60 * 1, alarmIntent);
+
         mViewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                mMoodHistory.setCurrentMood(mMoodAdapter.getMoods().get(position).getColor());
+
                 mDebugText.setText(String.valueOf(position + positionOffset));
 
                 int nextPosition;
@@ -70,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                MoodHistory.getPreferences().edit().putInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, position).apply();
             }
 
             @Override
@@ -101,10 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mCommentText = input.getText().toString();
-
-                        Mood mood = new Mood(R.drawable.smiley_happy, Color.GREEN);
-                        MoodHistory.addMood(mood);
-                        MoodHistory.getMood(0).setComment(mCommentText);
+                        mMoodHistory.setCurrentComment(mCommentText);
                     }
                 });
 
@@ -122,6 +141,21 @@ public class MainActivity extends AppCompatActivity {
         mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
         mViewPager2.setAdapter(mMoodAdapter);
         mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        int prefItem = MoodHistory.getPreferences().getInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1);
+
+        if (mViewPager2.getCurrentItem() != prefItem) {
+            mViewPager2.setCurrentItem(prefItem, false);
+        }
+    }
+
+    public void updateMoodItem() {
+        mViewPager2.setCurrentItem(1, true);
     }
 
     private List<Mood> generateMoods() {
