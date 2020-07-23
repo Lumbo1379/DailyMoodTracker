@@ -46,32 +46,55 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mMoodHistory = new MoodHistory(getPreferences(MODE_PRIVATE), Color.GREEN);
 
-        mViewPager2 = findViewById(R.id.activity_main_pager_image);
-        mDebugText = findViewById(R.id.activity_main_text_debug);
-        mConstraintLayout = (ConstraintLayout)findViewById(R.id.activity_main);
-        mHistoryButton = findViewById(R.id.activity_main_image_history);
-        mCommentButton = findViewById(R.id.activity_main_image_comment);
-        mMoodAdapter = new MoodViewPagerAdapter(generateMoods());
+        getViewComponents(); // Set fields with components from main layout
+        setAlarm(); // Used for updating mood history
+        initializeViewPager();
+        initializeViewPagerComponents(); // listeners for history and comment button
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        int prefItem = MoodHistory.getPreferences().getInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1);
+
+        if (mViewPager2.getCurrentItem() != prefItem) { // Passes when mood has been recent to default since last app activity, e.g. in mood history page 11:58pm to 01:02am
+            mViewPager2.setCurrentItem(prefItem, false);
+        }
+    }
+
+    private List<Mood> generateMoods() { // Moods displayed by view pager
+
+        Mood superHappy = new Mood(R.drawable.smiley_super_happy, Color.YELLOW);
+        Mood happy = new Mood(R.drawable.smiley_happy, Color.GREEN);
+        Mood normal = new Mood(R.drawable.smiley_normal, Color.BLUE);
+        Mood disappointed = new Mood(R.drawable.smiley_disappointed, Color.LTGRAY);
+        Mood sad = new Mood(R.drawable.smiley_sad, Color.RED);
+
+        return Arrays.asList(superHappy,
+                happy,
+                normal,
+                disappointed,
+                sad);
+    }
+
+    private void setAlarm() { // Alarm triggered once per day at 24:00 hrs
         AlarmManager alarmManager = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, MoodBroadcastReceiver.class);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        //calendar.set(Calendar.HOUR_OF_DAY, 24);
-        calendar.set(Calendar.HOUR_OF_DAY, 13);
-        calendar.set(Calendar.MINUTE, 47);
+        calendar.set(Calendar.HOUR_OF_DAY, 24); // Set time to trigger
 
-        //alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000 * 60 * 60 * 24, alarmIntent);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000 * 60 * 1, alarmIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000 * 60 * 60 * 24, alarmIntent); // Set repeat frequency (every 24 hrs)
+    }
 
+    private void initializeViewPager() {
         mViewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { // Blend colours from one mood to the other
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 mMoodHistory.setCurrentMood(mMoodAdapter.getMoods().get(position).getColor());
 
@@ -79,17 +102,17 @@ public class MainActivity extends AppCompatActivity {
 
                 int nextPosition;
 
-                if (position + positionOffset >= position && position != mMoodAdapter.getItemCount() - 1)
+                if (position + positionOffset >= position && position != mMoodAdapter.getItemCount() - 1) // If not on most down mood
                     nextPosition = position + 1;
                 else
-                    nextPosition = position - 1;
+                    nextPosition = position - 1; // If on last mood, cannot swipe up anymore
 
                 int resultColor = ColorUtils.blendARGB(mMoodAdapter.getMoods().get(position).getColor(), mMoodAdapter.getMoods().get(nextPosition).getColor(), Math.abs(positionOffset));
                 mConstraintLayout.setBackgroundColor(resultColor);
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position) { // Update preferences with current mood
                 super.onPageSelected(position);
                 MoodHistory.getPreferences().edit().putInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, position).apply();
             }
@@ -100,9 +123,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL); // Swipe up on down instead of left and right
+        mViewPager2.setAdapter(mMoodAdapter);
+        mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
+    }
+
+    private void initializeViewPagerComponents() {
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) { // Move from main layout to history layout
                 Intent moodHistoryIntent = new Intent(MainActivity.this, MoodHistoryActivity.class);
                 startActivityForResult(moodHistoryIntent, MOOD_HISTORY_ACTIVITY_REQUEST_CODE);
             }
@@ -110,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
         mCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) { // Comment on mood
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
                 builder.setTitle("Comment");
@@ -137,39 +166,15 @@ public class MainActivity extends AppCompatActivity {
                 builder.show();
             }
         });
-
-        mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL);
-        mViewPager2.setAdapter(mMoodAdapter);
-        mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        int prefItem = MoodHistory.getPreferences().getInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1);
-
-        if (mViewPager2.getCurrentItem() != prefItem) {
-            mViewPager2.setCurrentItem(prefItem, false);
-        }
-    }
-
-    public void updateMoodItem() {
-        mViewPager2.setCurrentItem(1, true);
-    }
-
-    private List<Mood> generateMoods() {
-
-        Mood superHappy = new Mood(R.drawable.smiley_super_happy, Color.YELLOW);
-        Mood happy = new Mood(R.drawable.smiley_happy, Color.GREEN);
-        Mood normal = new Mood(R.drawable.smiley_normal, Color.BLUE);
-        Mood disappointed = new Mood(R.drawable.smiley_disappointed, Color.LTGRAY);
-        Mood sad = new Mood(R.drawable.smiley_sad, Color.RED);
-
-        return Arrays.asList(superHappy,
-                happy,
-                normal,
-                disappointed,
-                sad);
+    private void getViewComponents() {
+        mMoodHistory = new MoodHistory(getPreferences(MODE_PRIVATE), Color.GREEN);
+        mViewPager2 = findViewById(R.id.activity_main_pager_image);
+        mDebugText = findViewById(R.id.activity_main_text_debug);
+        mConstraintLayout = (ConstraintLayout)findViewById(R.id.activity_main);
+        mHistoryButton = findViewById(R.id.activity_main_image_history);
+        mCommentButton = findViewById(R.id.activity_main_image_comment);
+        mMoodAdapter = new MoodViewPagerAdapter(generateMoods());
     }
 }

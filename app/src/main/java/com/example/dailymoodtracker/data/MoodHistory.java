@@ -56,7 +56,7 @@ public class MoodHistory {
         mPreferences.edit().putString(PREF_KEY_COMMENT_CURRENT, comment).apply();
     }
 
-    public static void updateMoodHistory() {
+    public static void updateMoodHistory() { // Shift moods up getting read of top date (8 days old now)
         mPreferences.edit().putInt(PREF_KEY_DAYS_PAST, mPreferences.getInt(PREF_KEY_DAYS_PAST, 0) + 1).apply();
 
         mPreferences.edit().putInt(PREF_KEY_COLOR_DAY_7, mPreferences.getInt(PREF_KEY_COLOR_DAY_6, DEFAULT_MOOD)).apply();
@@ -123,7 +123,7 @@ public class MoodHistory {
         }
     }
 
-    public static int getCount() {
+    public static int getCount() { // Store how many days have past, if more than 7 still only return 7 to display 7 most recent moods
         int daysPast = mPreferences.getInt(PREF_KEY_DAYS_PAST, 0);
 
         return daysPast > 7 ? 7 : daysPast;

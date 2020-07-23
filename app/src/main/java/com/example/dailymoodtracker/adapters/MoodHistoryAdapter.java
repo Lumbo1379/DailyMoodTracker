@@ -48,7 +48,7 @@ public class MoodHistoryAdapter extends BaseAdapter {
         int mood = MoodHistory.getMood(position);
         String comment = MoodHistory.getComment(position);
 
-        ImageView imageViewRectangle = (ImageView) convertView.findViewById(R.id.list_row_layout_image_rectangle);
+        ImageView imageViewRectangle = (ImageView) convertView.findViewById(R.id.list_row_layout_image_rectangle); // Coloured mood rectangle
         imageViewRectangle.setBackgroundColor(mood);
 
         TextView textView = (TextView) convertView.findViewById(R.id.list_row_layout_text_time);
@@ -80,13 +80,13 @@ public class MoodHistoryAdapter extends BaseAdapter {
 
         if (!comment.isEmpty()) {
             ImageView imageViewComment = (ImageView) convertView.findViewById(R.id.list_row_layout_image_comment);
-            imageViewComment.setTag(position);
+            imageViewComment.setTag(position); // Used to get comment of appropriate mood
             imageViewComment.setVisibility(View.VISIBLE);
 
             imageViewComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mToast != null) {
+                    if (mToast != null) { // Stop spam of toast
                         mToast.cancel();
                     }
 

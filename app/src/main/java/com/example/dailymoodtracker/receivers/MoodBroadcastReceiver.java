@@ -15,7 +15,7 @@ public class MoodBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        MoodHistory.updateMoodHistory();
-        MoodHistory.getPreferences().edit().putInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1).apply();
+        MoodHistory.updateMoodHistory(); // Shift moods
+        MoodHistory.getPreferences().edit().putInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1).apply(); // Reset mood on view pager to default when next displayed
     }
 }
