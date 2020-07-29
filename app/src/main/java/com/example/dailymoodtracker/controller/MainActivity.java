@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,11 +42,14 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mCommentButton;
     private String mCommentText = "";
     private MoodHistory mMoodHistory;
+    private MediaPlayer mHappySoundEffect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mHappySoundEffect = MediaPlayer.create(this, R.raw.party_popper);
 
         getViewComponents(); // Set fields with components from main layout
         setAlarm(); // Used for updating mood history
@@ -115,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) { // Update preferences with current mood
                 super.onPageSelected(position);
                 MoodHistory.getPreferences().edit().putInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, position).apply();
+
+                if (position == 0) {
+                    mHappySoundEffect.start();
+                }
             }
 
             @Override
@@ -125,7 +133,10 @@ public class MainActivity extends AppCompatActivity {
 
         mViewPager2.setOrientation(ViewPager2.ORIENTATION_VERTICAL); // Swipe up on down instead of left and right
         mViewPager2.setAdapter(mMoodAdapter);
-        mViewPager2.setCurrentItem(1, false); // Set default image, with no smooth scroll
+
+        int prefItem = MoodHistory.getPreferences().getInt(MoodHistory.PREF_KEY_CURRENT_MOOD_ITEM, 1);
+
+        mViewPager2.setCurrentItem(prefItem, false); // Set default image, with no smooth scroll
     }
 
     private void initializeViewPagerComponents() {
